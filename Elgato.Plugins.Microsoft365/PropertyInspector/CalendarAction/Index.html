@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover">
+    <meta name=apple-mobile-web-app-capable content=yes>
+    <meta name=apple-mobile-web-app-status-bar-style content=black>
+    <title>Microsoft 365 Mail Widget</title>
+    <link rel="stylesheet" href="../sdpi.css">
+</head>
+<body>
+    <div class="sdpi-wrapper">
+        <details class="message info">
+            <summary>Microsoft 365 Tools</summary>
+        </details>
+
+        <div class="sdpi-item" id="your_name" title="This field refers to the app id, which has to be created in the Azure Portal in order to authenticate.">
+            <div class="sdpi-item-label">Azure App ID</div>
+            <input class="sdpi-item-value sdProperty" id="appId" value="" placeholder="App id created in Azure portal" required oninput="setSettings()">
+        </div>
+
+        <div class="sdpi-item">
+            <div class="sdpi-item-label">Actions</div>
+            <button class="sdpi-item-value" id="reset" onclick="sendValueToPlugin('clear', 'operation')">Logout & Reset</button>
+        </div>
+
+        <details class="message">
+            <summary>Browser may open for authentication the first time.</summary>
+        </details>
+    </div>
+    <script src="../sdtools.common.js"></script>
+</body>
+</html>

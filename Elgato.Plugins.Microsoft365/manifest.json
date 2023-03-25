@@ -1,0 +1,54 @@
+{
+  "Actions": [
+    {
+      "Icon": "Images/mailIcon",
+      "Name": "Mail",
+      "States": [
+        {
+          "Image": "Images/bg",
+          "TitleAlignment": "bottom",
+          "FontSize": "16"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "Tooltip": "Stopwatch implementation with various display and behaviour settings.",
+      "UUID": "es.mspi.microsoft.mail",
+      "PropertyInspectorPath": "PropertyInspector/MailAction/Index.html"
+    },
+    {
+      "Icon": "Images/calendarIcon",
+      "Name": "Calendar",
+      "States": [
+        {
+          "Image": "Images/bg",
+          "TitleAlignment": "bottom",
+          "FontSize": "16"
+        }
+      ],
+      "SupportedInMultiActions": false,
+      "Tooltip": "Stopwatch implementation with various display and behaviour settings.",
+      "UUID": "es.mspi.microsoft.calendar",
+      "PropertyInspectorPath": "PropertyInspector/CalendarAction/Index.html"
+    }
+  ],
+  "Author": "MS",
+  "Description": "Stopwatch implementation with various display and behaviour settings.",
+  "Name": "Stopwatch",
+  "Icon": "Images/pluginIcon",
+  "URL": "https://barraider.github.io/",
+  "Version": "1.1",
+  "CodePath": "Elgato.Plugins.Microsoft365.exe",
+  "Category": "Microsoft 365",
+  "CategoryIcon": "Images/categoryIcon",
+  "UUID": "es.mspies.microsoft",
+  "OS": [
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "4.1"
+  }
+}

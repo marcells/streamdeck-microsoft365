@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RuntimeIdentifier Condition=" '$(OS)' == 'Windows_NT' and '$(Configuration)'=='Debug' ">win-x64</RuntimeIdentifier>
+		<RuntimeIdentifier Condition=" '$(OS)' != 'Windows_NT' and '$(Configuration)'=='Debug' ">osx-x64</RuntimeIdentifier>
+		<RuntimeIdentifiers Condition="'$(Configuration)'=='Release' ">win-x64;osx-x64</RuntimeIdentifiers>
+		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition=" '$(Configuration)'=='Debug'">
+		<Exec Condition=" '$(OS)' == 'Windows_NT' " Command="powershell -ExecutionPolicy Unrestricted -file &quot;$(ProjectDir)RegisterPluginAndStartStreamDeck.ps1&quot;" />
+		<Exec Condition=" '$(OS)' != 'Windows_NT' " Command="bash $(ProjectDir)RegisterPluginAndStartStreamDeck.sh" />
+	</Target>
+
+  <ItemGroup>
+    <PackageReference Include="streamdeck-client-csharp" Version="4.3.0" />
+    <PackageReference Include="StreamDeck-Tools" Version="6.0.0" />
+    <PackageReference Include="Svg" Version="3.4.4" />
+    <PackageReference Include="Microsoft.Graph" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.50.0" />
+    <PackageReference Include="Microsoft.Identity.Client.Extensions.Msal" Version="2.26.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+
+    <Content Include="PropertyInspector\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+
+    <Content Include="Images\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+
+    <Content Include="Assets\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+		<Content Include="Elgato.Plugins.Microsoft365.cmd">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+</Project>
