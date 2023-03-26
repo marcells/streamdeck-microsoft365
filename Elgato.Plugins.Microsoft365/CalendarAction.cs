@@ -12,6 +12,9 @@ public class CalendarPluginSettings : IPluginSettings
 
     [JsonProperty(PropertyName = "appId")]
     public string? AppId { get; set; }
+
+    [JsonProperty(PropertyName = "account")]
+    public string? Account { get; set; }
 }
 
 [PluginActionId("es.mspi.microsoft.calendar")]
@@ -33,6 +36,8 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
     {
         if (!IsGraphApiInitialized)
             return;
+
+        base.KeyPressed(payload);
 
         Process.Start(new ProcessStartInfo { FileName = $"https://outlook.live.com/calendar", UseShellExecute = true });
 

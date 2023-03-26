@@ -11,6 +11,8 @@ public interface IPluginSettings
     abstract static IPluginSettings CreateDefaultSettings();
 
     string? AppId { get; set; }
+
+    string? Account { get; set; }
 }
 
 public abstract class GraphAction<TSettings> : KeyAndEncoderBase
@@ -20,8 +22,9 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
 
     public GraphAction(ISDConnection connection, InitialPayload payload) : base(connection, payload)
     {
-        connection.OnSendToPlugin += SendToPlugin;
-        
+        connection.OnSendToPlugin += OnSendToPlugin;
+        connection.OnPropertyInspectorDidAppear += OnPropertyInspectorDidAppear;
+
         if (payload.Settings == null || payload.Settings.Count == 0)
         {
             Settings = (TSettings)TSettings.CreateDefaultSettings();
@@ -31,7 +34,7 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
         {
             Settings = payload.Settings.ToObject<TSettings>()!;
         }
-        
+
         InitializePlugin();
     }
 
@@ -81,30 +84,70 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
 
     protected async Task ResetPlugin()
     {
-        Settings = (TSettings)TSettings.CreateDefaultSettings();
+        var currentAccount = Settings.Account;
+
+        Settings.Account = string.Empty;
         await Connection.SetSettingsAsync(JObject.FromObject(Settings));
 
         if (_graphAuthenticator != null)
-            await _graphAuthenticator.Reset();
+            await _graphAuthenticator.RemoveAccount(currentAccount);
+
+        await SendAccountsToPropertyInspector();
     }
 
     protected async void InitializePlugin()
     {
-        _graphAuthenticator  = new GraphAuthenticator(new GraphSettings { ClientId = Settings?.AppId });
+        _graphAuthenticator  = new GraphAuthenticator(new GraphSettings { ClientId = Settings?.AppId, AccountId = Settings?.Account });
+        await SendAccountsToPropertyInspector();
+        
+        if (string.IsNullOrWhiteSpace(Settings?.AppId) || string.IsNullOrWhiteSpace(Settings?.Account))
+            return;
+
         await _graphAuthenticator.InitializeAsync();
+
+        await SendAccountsToPropertyInspector();
 
         await OnPluginInitialized();
     }
 
     protected abstract Task OnPluginInitialized();
 
-    private async void SendToPlugin(object? sender, SDEventReceivedEventArgs<SendToPlugin> e)
+    private async void OnSendToPlugin(object? sender, SDEventReceivedEventArgs<SendToPlugin> e)
     {
         var operation = e.Event.Payload.GetValue("operation")?.ToString();
 
-        if (operation == "clear")
+        if (operation == "add")
+        {
+            var authenticator  = new GraphAuthenticator(new GraphSettings { ClientId = Settings?.AppId, AccountId = null });
+            await authenticator.InitializeAsync();
+
+            await SendAccountsToPropertyInspector();
+        }
+        else if (operation == "remove")
         {
             await ResetPlugin();
         }
+    }
+
+    private async void OnPropertyInspectorDidAppear(object? sender, SDEventReceivedEventArgs<PropertyInspectorDidAppear> e)
+    {
+        await SendAccountsToPropertyInspector();
+    }
+
+    private async Task SendAccountsToPropertyInspector()
+    {
+        if (_graphAuthenticator == null)
+        {
+            await SendMessageToPropertyInspector("loadedAccounts", new { });
+            return;
+        }
+
+        var accounts = await _graphAuthenticator.GetAccounts();
+        await Connection.SendToPropertyInspectorAsync(JObject.FromObject(new { message = "accountsLoaded", data = new { accounts = accounts, currentAccount = Settings.Account }}));
+    }
+
+    private async Task SendMessageToPropertyInspector(string message, object data)
+    {
+        await Connection.SendToPropertyInspectorAsync(JObject.FromObject(new { message, data}));
     }
 }

@@ -37,7 +37,7 @@ function websocketOnMessage(evt) {
 
     if (jsonObj.event === 'sendToPropertyInspector') {
         var payload = jsonObj.payload;
-        loadConfiguration(payload);
+        handleSendToPropertyInspector(payload);
     }
     else if (jsonObj.event === 'didReceiveSettings') {
         var payload = jsonObj.payload;
@@ -46,6 +46,13 @@ function websocketOnMessage(evt) {
     else {
         console.log("Unhandled websocketOnMessage: " + jsonObj.event);
     }
+}
+
+function handleSendToPropertyInspector(payload) {
+    if (payload.message == 'accountsLoaded')
+        loadAccounts(payload.data);
+    else
+        loadConfiguration(payload);
 }
 
 function loadConfiguration(payload) {
@@ -69,6 +76,28 @@ function loadConfiguration(payload) {
             console.log("loadConfiguration failed for key: " + key + " - " + err);
         }
     }
+}
+
+function loadAccounts(payload) {
+    var accounts = payload.accounts;
+    var accountElement = document.getElementById("account");
+
+    accountElement.innerText = null;
+
+    const option = document.createElement("option");
+    option.text = "(None)";
+    option.value = '';
+    accountElement.appendChild(option);
+
+    for (const [id, name] of Object.entries(accounts)) {
+        const option = document.createElement("option");
+        option.text = name;
+        option.value = id;
+
+        accountElement.appendChild(option);
+    }
+
+    accountElement.value = payload.currentAccount;
 }
 
 function setSettings() {

@@ -19,9 +19,16 @@
             <input class="sdpi-item-value sdProperty" id="appId" value="" placeholder="App id created in Azure portal" required oninput="setSettings()">
         </div>
 
+        <div class="sdpi-item" id="accounts-setting">
+            <div class="sdpi-item-label">Account</div>
+            <select class="sdpi-item-value select sdProperty" id="account" onchange="setSettings()">
+            </select>
+        </div>
+
         <div class="sdpi-item">
-            <div class="sdpi-item-label">Actions</div>
-            <button class="sdpi-item-value" id="reset" onclick="sendValueToPlugin('clear', 'operation')">Logout & Reset</button>
+            <div class="sdpi-item-label">Account actions</div>
+            <button class="sdpi-item-value max50" id="add" onclick="sendValueToPlugin('add', 'operation')">Add</button>
+            <button class="sdpi-item-value max50" id="reset" onclick="sendValueToPlugin('remove', 'operation')">Remove</button>
         </div>
 
         <details class="message">

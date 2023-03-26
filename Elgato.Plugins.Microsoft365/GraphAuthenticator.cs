@@ -21,7 +21,7 @@ public class GraphAuthenticator
     {
         var (app, cacheHelper) = await GetAppAndCacheHelper();
 
-        var tokenProvider = new TokenProvider(app, AppConfig.Scopes);
+        var tokenProvider = new TokenProvider(app, AppConfig.Scopes, _graphSettings.AccountId);
         var accessTokenProvider = new BaseBearerTokenAuthenticationProvider(tokenProvider);
         
         return new GraphServiceClient(accessTokenProvider);
@@ -47,7 +47,7 @@ public class GraphAuthenticator
 
         var app = builder.Build();
 
-        var cacheHelper = await MsalCacheHelper.CreateAsync(storageProperties );
+        var cacheHelper = await MsalCacheHelper.CreateAsync(storageProperties);
         cacheHelper.RegisterCache(app.UserTokenCache);
 
         return (app, cacheHelper);
@@ -71,7 +71,19 @@ public class GraphAuthenticator
         }
     }
 
-    public async Task Reset()
+    public async Task<IReadOnlyDictionary<string, string>> GetAccounts()
+    {
+        if (string.IsNullOrWhiteSpace(_graphSettings.ClientId))
+            return new Dictionary<string, string> { };
+
+        var (app, _) = await GetAppAndCacheHelper();
+
+        var accounts = await app.GetAccountsAsync();
+
+        return accounts.ToDictionary(x => x.HomeAccountId.Identifier, x => x.Username);
+    }
+
+    public async Task RemoveAccount(string? accountId)
     {
         if (string.IsNullOrWhiteSpace(_graphSettings.ClientId))
             return;
@@ -79,7 +91,10 @@ public class GraphAuthenticator
         var (app, _) = await GetAppAndCacheHelper();
 
         var accounts = await app.GetAccountsAsync();
-        accounts.ToList().ForEach(async account => await app.RemoveAsync(account));
+        var account = accounts.SingleOrDefault(x => x.HomeAccountId.Identifier == accountId);
+
+        if (account != null)
+            await app.RemoveAsync(account);
 
         IsInitialized = false;
     }
@@ -97,11 +112,13 @@ public class TokenProvider : IAccessTokenProvider
 {
     private IPublicClientApplication _app;
     private string[] _scopes;
+    private string? _accountId;
 
-    public TokenProvider(IPublicClientApplication app, string[] scopes)
+    public TokenProvider(IPublicClientApplication app, string[] scopes, string? accountId)
     {
         _app = app;
         _scopes = scopes;
+        _accountId = accountId;
 
         AllowedHostsValidator = new AllowedHostsValidator();
     }
@@ -113,7 +130,7 @@ public class TokenProvider : IAccessTokenProvider
         try
         {
             var accounts = await _app.GetAccountsAsync();
-            var account = accounts.SingleOrDefault();
+            var account = _accountId == null ? null : accounts.FirstOrDefault(x => x.HomeAccountId.Identifier == _accountId);
 
             result = await _app.AcquireTokenSilent(_scopes, account).ExecuteAsync();
         }
@@ -133,6 +150,7 @@ public class TokenProvider : IAccessTokenProvider
 public class GraphSettings
 {
     public string? ClientId { get; set; }
+    public string? AccountId { get; set; }
 }
 
 static class AppConfig

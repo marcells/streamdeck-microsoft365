@@ -11,7 +11,9 @@ The plugin uses the Microsoft Graph API for accessing the necessary information.
 2. After creating the app, you have to copy the "Application (client) ID" and paste it in the Stream Deck Plugin configuration for the button.
 ![Application ID](app_id.png)
 
-3. When the plugin first tries to collect information about mails or calendar entries, your web browser will open and you have to login into your account. That's all.
+3. Click the "Add" button to add your Microsoft accounts. Your web browser will open and you have to authenticate. That's all.
+
+Hint: Your accounts are saved per Application ID. So, if you reuse the same App ID for all your actions, you don't have to authenticate again. Just pick your account from the list.
 
 ## Current features
 

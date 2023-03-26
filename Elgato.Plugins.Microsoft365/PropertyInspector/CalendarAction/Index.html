@@ -5,7 +5,7 @@
     <meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover">
     <meta name=apple-mobile-web-app-capable content=yes>
     <meta name=apple-mobile-web-app-status-bar-style content=black>
-    <title>Microsoft 365 Mail Widget</title>
+    <title>Microsoft 365 Calendar Widget</title>
     <link rel="stylesheet" href="../sdpi.css">
 </head>
 <body>
@@ -19,9 +19,16 @@
             <input class="sdpi-item-value sdProperty" id="appId" value="" placeholder="App id created in Azure portal" required oninput="setSettings()">
         </div>
 
+        <div class="sdpi-item" id="accounts-setting">
+            <div class="sdpi-item-label">Account</div>
+            <select class="sdpi-item-value select sdProperty" id="account" onchange="setSettings()">
+            </select>
+        </div>
+
         <div class="sdpi-item">
-            <div class="sdpi-item-label">Actions</div>
-            <button class="sdpi-item-value" id="reset" onclick="sendValueToPlugin('clear', 'operation')">Logout & Reset</button>
+            <div class="sdpi-item-label">Account actions</div>
+            <button class="sdpi-item-value max50" id="add" onclick="sendValueToPlugin('add', 'operation')">Add</button>
+            <button class="sdpi-item-value max50" id="reset" onclick="sendValueToPlugin('remove', 'operation')">Remove</button>
         </div>
 
         <details class="message">
