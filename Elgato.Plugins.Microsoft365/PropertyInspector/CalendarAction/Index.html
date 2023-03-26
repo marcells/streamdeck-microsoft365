@@ -11,10 +11,16 @@
 <body>
     <div class="sdpi-wrapper">
         <details class="message info">
-            <summary>Microsoft 365 Tools</summary>
+            <summary>More info</summary>
+            <p>
+                - Shows the number of planned events for today or tomorrow, if there aren't any for the current day<br />
+                - Changes button color, depending on the time the next event starts<br />
+                - Button opens the calendar in the web browser<br />
+            </p>
+            <a href="#" onclick="openWebsite('https://github.com/marcells/streamdeck-microsoft365/blob/main/README.md')">Configuration docs</a>
         </details>
 
-        <div class="sdpi-item" id="your_name" title="This field refers to the app id, which has to be created in the Azure Portal in order to authenticate.">
+        <div class="sdpi-item" id="appId-settings" title="This field refers to the app id, which has to be created in the Azure Portal in order to authenticate.">
             <div class="sdpi-item-label">Azure App ID</div>
             <input class="sdpi-item-value sdProperty" id="appId" value="" placeholder="App id created in Azure portal" required oninput="setSettings()">
         </div>
@@ -30,10 +36,6 @@
             <button class="sdpi-item-value max50" id="add" onclick="sendValueToPlugin('add', 'operation')">Add</button>
             <button class="sdpi-item-value max50" id="reset" onclick="sendValueToPlugin('remove', 'operation')">Remove</button>
         </div>
-
-        <details class="message">
-            <summary>Browser may open for authentication the first time.</summary>
-        </details>
     </div>
     <script src="../sdtools.common.js"></script>
 </body>

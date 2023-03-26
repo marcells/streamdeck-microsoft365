@@ -66,10 +66,6 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
     {
     }
 
-    public override void Dispose()
-    {
-    }
-
     public override void DialRotate(DialRotatePayload payload)
     {
     }
@@ -82,7 +78,13 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
     {
     }
 
-    protected async Task ResetPlugin()
+    public override void Dispose()
+    {
+    }
+
+    protected abstract Task OnPluginInitialized();
+
+    private async Task RemoveAccount()
     {
         var currentAccount = Settings.Account;
 
@@ -95,7 +97,7 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
         await SendAccountsToPropertyInspector();
     }
 
-    protected async void InitializePlugin()
+    private async void InitializePlugin()
     {
         _graphAuthenticator  = new GraphAuthenticator(new GraphSettings { ClientId = Settings?.AppId, AccountId = Settings?.Account });
         await SendAccountsToPropertyInspector();
@@ -110,8 +112,6 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
         await OnPluginInitialized();
     }
 
-    protected abstract Task OnPluginInitialized();
-
     private async void OnSendToPlugin(object? sender, SDEventReceivedEventArgs<SendToPlugin> e)
     {
         var operation = e.Event.Payload.GetValue("operation")?.ToString();
@@ -125,7 +125,7 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
         }
         else if (operation == "remove")
         {
-            await ResetPlugin();
+            await RemoveAccount();
         }
     }
 
