@@ -1,92 +1,40 @@
 using System.Diagnostics;
 using System.Drawing;
 using BarRaider.SdTools;
-using BarRaider.SdTools.Events;
-using BarRaider.SdTools.Payloads;
-using BarRaider.SdTools.Wrappers;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Svg;
 
 namespace Elgato.Plugins.Microsoft365;
 
-[PluginActionId("es.mspi.microsoft.mail")]
-public class MailAction : KeyAndEncoderBase
+public class MailPluginSettings : IPluginSettings
 {
-    private PluginSettings _settings;
-    private GraphAuthenticator _graphAuthenticator;
+    public static IPluginSettings CreateDefaultSettings() => new MailPluginSettings();
 
+    [JsonProperty(PropertyName = "appId")]
+    public string AppId { get; set; }
+}
+
+[PluginActionId("es.mspi.microsoft.mail")]
+public class MailAction : GraphAction<MailPluginSettings>
+{
     private DateTime _lastCheck = DateTime.Now.AddDays(-1);
 
-    private class PluginSettings
+    public MailAction(ISDConnection connection, InitialPayload payload)
+        : base(connection, payload)
     {
-        public static PluginSettings CreateDefaultSettings() => new PluginSettings();
-
-        [JsonProperty(PropertyName = "appId")]
-        public string AppId { get; set; }
     }
 
-    public MailAction(ISDConnection connection, InitialPayload payload) : base(connection, payload)
+    protected override async Task OnPluginInitialized()
     {
-        connection.OnSendToPlugin += SendToPlugin;
-
-        if (payload.Settings == null || payload.Settings.Count == 0)
-        {
-            _settings = PluginSettings.CreateDefaultSettings();
-            Connection.SetSettingsAsync(JObject.FromObject(_settings));
-        }
-        else
-        {
-            _settings = payload.Settings.ToObject<PluginSettings>()!;
-        }
-        
-        InitializePlugin();
-    }
-
-    private async void SendToPlugin(object? sender, SDEventReceivedEventArgs<SendToPlugin> e)
-    {
-        var operation = e.Event.Payload.GetValue("operation")?.ToString();
-
-        if (operation == "clear")
-        {
-            await ResetPlugin();
-        }
-    }
-
-    private async Task ResetPlugin()
-    {
-        _settings = PluginSettings.CreateDefaultSettings();
-        await Connection.SetSettingsAsync(JObject.FromObject(_settings));
-
-        await _graphAuthenticator.Reset();
-    }
-
-    private async void InitializePlugin()
-    {
-        _graphAuthenticator  = new GraphAuthenticator(new GraphSettings { ClientId = _settings.AppId });
-        await _graphAuthenticator.InitializeAsync();
-
         await TryUpdateBadge(true);
-    }
-
-    public override void ReceivedSettings(ReceivedSettingsPayload payload)
-    {
-        Tools.AutoPopulateSettings(_settings, payload.Settings);
-
-        InitializePlugin();
-    }
-
-    public override void ReceivedGlobalSettings(ReceivedGlobalSettingsPayload payload)
-    {
     }
 
     public override async void KeyPressed(KeyPayload payload)
     {
-        if (!_graphAuthenticator.IsInitialized)
+        if (!IsGraphApiInitialized)
             return;
 
-        var result = await _graphAuthenticator
-            .GetApp()
+        var result = await GraphApp
             .Me
             .MailFolders["Inbox"]
             .GetAsync();
@@ -97,34 +45,14 @@ public class MailAction : KeyAndEncoderBase
         await TryUpdateBadge(true);
     }
 
-    public override void KeyReleased(KeyPayload payload)
-    {
-    }
-
     public override async void OnTick()
     {
         await TryUpdateBadge(false);
     }
 
-    public override void Dispose()
-    {
-    }
-
-    public override void DialRotate(DialRotatePayload payload)
-    {
-    }
-
-    public override void DialPress(DialPressPayload payload)
-    {
-    }
-
-    public override void TouchPress(TouchpadPressPayload payload)
-    {
-    }
-
     private async Task TryUpdateBadge(bool forceUpdate)
     {
-        if (!_graphAuthenticator.IsInitialized)
+        if (!IsGraphApiInitialized)
         {
             await NoConnectionInfo();
             return;
@@ -143,8 +71,7 @@ public class MailAction : KeyAndEncoderBase
     
     private async Task UpdateBadge()
     {
-        var result = await _graphAuthenticator
-            .GetApp()
+        var result = await GraphApp
             .Me
             .MailFolders["Inbox"]
             .Messages
