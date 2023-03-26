@@ -1,12 +1,8 @@
-using System.Diagnostics;
-using System.Drawing;
 using BarRaider.SdTools;
 using BarRaider.SdTools.Events;
 using BarRaider.SdTools.Payloads;
 using BarRaider.SdTools.Wrappers;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Svg;
 
 namespace Elgato.Plugins.Microsoft365;
 
@@ -14,13 +10,13 @@ public interface IPluginSettings
 {
     abstract static IPluginSettings CreateDefaultSettings();
 
-    string AppId { get; set; }
+    string? AppId { get; set; }
 }
 
 public abstract class GraphAction<TSettings> : KeyAndEncoderBase
     where TSettings : IPluginSettings
 {
-    private GraphAuthenticator _graphAuthenticator;
+    private GraphAuthenticator? _graphAuthenticator;
 
     public GraphAction(ISDConnection connection, InitialPayload payload) : base(connection, payload)
     {
@@ -41,9 +37,12 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
 
     public TSettings Settings { get; set; }
 
-    public bool IsGraphApiInitialized => _graphAuthenticator.IsInitialized;
+    public bool IsGraphApiInitialized => _graphAuthenticator != null ? _graphAuthenticator.IsInitialized : false;
 
-    public Microsoft.Graph.GraphServiceClient GraphApp => _graphAuthenticator.GetApp();
+    public Microsoft.Graph.GraphServiceClient GraphApp =>
+        _graphAuthenticator != null && _graphAuthenticator.IsInitialized
+            ? _graphAuthenticator.GetApp()
+            : throw new InvalidOperationException("GraphAuthenticator not initialized.");
 
     public override void KeyPressed(KeyPayload payload)
     {
@@ -85,12 +84,13 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
         Settings = (TSettings)TSettings.CreateDefaultSettings();
         await Connection.SetSettingsAsync(JObject.FromObject(Settings));
 
-        await _graphAuthenticator.Reset();
+        if (_graphAuthenticator != null)
+            await _graphAuthenticator.Reset();
     }
 
     protected async void InitializePlugin()
     {
-        _graphAuthenticator  = new GraphAuthenticator(new GraphSettings { ClientId = Settings.AppId });
+        _graphAuthenticator  = new GraphAuthenticator(new GraphSettings { ClientId = Settings?.AppId });
         await _graphAuthenticator.InitializeAsync();
 
         await OnPluginInitialized();

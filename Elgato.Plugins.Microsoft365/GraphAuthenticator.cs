@@ -132,7 +132,7 @@ public class TokenProvider : IAccessTokenProvider
 
 public class GraphSettings
 {
-    public string ClientId { get; set; } // db75ff81-2cc6-4048-ab2a-9092cf25e7f6
+    public string? ClientId { get; set; }
 }
 
 static class AppConfig
@@ -149,9 +149,9 @@ static class TokenCacheConfig
     public const string KeyChainServiceName = "myapp_msal_service";
     public const string KeyChainAccountName = "myapp_msal_account";
 
-    public const string LinuxKeyRingSchema = "com.contoso.devtools.tokencache";
+    public const string LinuxKeyRingSchema = "es.mspies.microsoft.tokencache";
     public const string LinuxKeyRingCollection = MsalCacheHelper.LinuxKeyRingDefaultCollection;
-    public const string LinuxKeyRingLabel = "MSAL token cache for all Contoso dev tool apps.";
+    public const string LinuxKeyRingLabel = "MSAL token cache for all Elgato Stream Deck Microsoft 365 action.";
     public static readonly KeyValuePair<string, string> LinuxKeyRingAttr1 = new KeyValuePair<string, string>("Version", "1");
     public static readonly KeyValuePair<string, string> LinuxKeyRingAttr2 = new KeyValuePair<string, string>("ProductGroup", "MyApps");
 }

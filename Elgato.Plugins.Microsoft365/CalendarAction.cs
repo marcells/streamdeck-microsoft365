@@ -11,7 +11,7 @@ public class CalendarPluginSettings : IPluginSettings
     public static IPluginSettings CreateDefaultSettings() => new CalendarPluginSettings();
 
     [JsonProperty(PropertyName = "appId")]
-    public string AppId { get; set; }
+    public string? AppId { get; set; }
 }
 
 [PluginActionId("es.mspi.microsoft.calendar")]

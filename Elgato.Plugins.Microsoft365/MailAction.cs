@@ -11,7 +11,7 @@ public class MailPluginSettings : IPluginSettings
     public static IPluginSettings CreateDefaultSettings() => new MailPluginSettings();
 
     [JsonProperty(PropertyName = "appId")]
-    public string AppId { get; set; }
+    public string? AppId { get; set; }
 }
 
 [PluginActionId("es.mspi.microsoft.mail")]
