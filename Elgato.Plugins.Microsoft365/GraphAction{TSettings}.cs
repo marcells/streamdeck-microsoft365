@@ -15,13 +15,15 @@ public interface IPluginSettings
     string? Account { get; set; }
 }
 
-public abstract class GraphAction<TSettings> : KeyAndEncoderBase
+public abstract class GraphAction<TSettings> : KeyAndEncoderBase, IAction
     where TSettings : IPluginSettings
 {
     private GraphAuthenticator? _graphAuthenticator;
 
     public GraphAction(ISDConnection connection, InitialPayload payload) : base(connection, payload)
     {
+        ActionNotifier.Instance.RegisterAction(this);
+
         connection.OnSendToPlugin += OnSendToPlugin;
         connection.OnPropertyInspectorDidAppear += OnPropertyInspectorDidAppear;
 
@@ -41,6 +43,8 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
     public TSettings Settings { get; set; }
 
     public bool IsGraphApiInitialized => _graphAuthenticator != null ? _graphAuthenticator.IsInitialized : false;
+
+    public string? AppId => Settings?.AppId;
 
     public Microsoft.Graph.GraphServiceClient GraphApp =>
         _graphAuthenticator != null && _graphAuthenticator.IsInitialized
@@ -80,21 +84,42 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
 
     public override void Dispose()
     {
+        ActionNotifier.Instance.UnregisterAction(this);
     }
 
     protected abstract Task OnPluginInitialized();
 
-    private async Task RemoveAccount()
+    public async void OnAccountRemoved(string accountId)
     {
-        var currentAccount = Settings.Account;
+        await RemoveAccount(accountId);
+    }
 
-        Settings.Account = string.Empty;
-        await Connection.SetSettingsAsync(JObject.FromObject(Settings));
+    private async Task RemoveSelectedAccount()
+    {
+        if (string.IsNullOrWhiteSpace(Settings.Account))
+            return;
 
-        if (_graphAuthenticator != null)
-            await _graphAuthenticator.RemoveAccount(currentAccount);
+        var accountId = Settings.Account;
+        await RemoveAccount(accountId);
 
-        await SendAccountsToPropertyInspector();
+        ActionNotifier.Instance.NotifyAllAboutRemovedAccount(Settings.AppId, accountId);
+    }
+
+    private async Task RemoveAccount(string? accountId)
+    {
+        if (string.IsNullOrWhiteSpace(accountId))
+            return;
+
+        if (Settings.Account?.ToLowerInvariant() == accountId?.ToLowerInvariant())
+        {
+            Settings.Account = string.Empty;
+            await Connection.SetSettingsAsync(JObject.FromObject(Settings));
+
+            if (_graphAuthenticator != null)
+                await _graphAuthenticator.RemoveAccount(accountId);
+
+            await SendAccountsToPropertyInspector();
+        }
     }
 
     private async void InitializePlugin()
@@ -125,7 +150,7 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase
         }
         else if (operation == "remove")
         {
-            await RemoveAccount();
+            await RemoveSelectedAccount();
         }
     }
 
