@@ -20,6 +20,7 @@ public class CalendarPluginSettings : IPluginSettings
 [PluginActionId("es.mspi.microsoft.calendar")]
 public class CalendarAction : GraphAction<CalendarPluginSettings>
 {
+    private AnimatedIcon? _animatedIcon;
     private DateTime _lastCheck = DateTime.Now.AddDays(-1);
 
     public CalendarAction(ISDConnection connection, InitialPayload payload)
@@ -40,6 +41,13 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
         Process.Start(new ProcessStartInfo { FileName = $"https://outlook.live.com/calendar", UseShellExecute = true });
 
         await TryUpdateBadge(true);
+    }
+
+    public override void Dispose()
+    {
+        _animatedIcon?.CancelAnimation();
+
+        base.Dispose();
     }
 
     public override async void OnTick()
@@ -117,7 +125,12 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
         var result = results.Count;
 
         var times = results
-            .Select(x => new { StartTime = DateTime.Parse(x.Start!.DateTime!).ToLocalTime(), EndTime = DateTime.Parse(x.End!.DateTime!).ToLocalTime() })
+            .Select(x => new 
+            { 
+                StartTime = DateTime.Parse(x.Start!.DateTime!).ToLocalTime(),
+                EndTime = DateTime.Parse(x.End!.DateTime!).ToLocalTime(),
+                Subject = x.Subject,
+            })
             .OrderBy(x => x.StartTime)
             .ToList();
 
@@ -132,15 +145,24 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
             ? DateTime.Now - currentEvent.StartTime
             : (TimeSpan?)null;
         
-        var iconCreator = new IconCreator("Assets\\calendar.png");
+        _animatedIcon?.CancelAnimation();
 
-        var content = iconCreator.CreateNotificationSvg(result, GetBackgroundColorForEventTimes(nextEventStartsIn, currentEventRunningFor));
+        _animatedIcon = new AnimatedIcon("Assets\\calendar.png")
+        {
+            Count = result,
+            BackgroundColor = GetBackgroundColorForEventTimes(nextEventStartsIn, currentEventRunningFor),
+            Header = nextEvent?.StartTime.ToShortTimeString(),
+            Footer = nextEvent?.Subject,
+            OnIconCreated = async content => await Connection.SetImageAsync($"data:image/svg+xml;charset=utf8,{content}"),
+        };
 
-        await Connection.SetImageAsync($"data:image/svg+xml;charset=utf8,{content}");
+        _animatedIcon.AnimateFooter();
     }
 
     private async Task NoConnectionInfo()
     {
+        _animatedIcon?.CancelAnimation();
+
         var iconCreator = new IconCreator("Assets\\calendar.png");
 
         var content = iconCreator.CreateNoConnectionSvg();

@@ -12,7 +12,7 @@ class IconCreator
 
     public string BadgeImageFilePath { get; init; }
 
-    public string CreateNotificationSvg(int count, Color backgroundColor)
+    public string CreateNotificationSvg(int count, Color backgroundColor, string? header = null, string? footer = null)
     {
         var doc = new SvgDocument
         {
@@ -39,6 +39,32 @@ class IconCreator
             X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 36) },
             Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 48.5f) },
         });
+
+        if (header != null)
+        {
+            doc.Children.Add(new SvgText(header)
+            {
+                FontSize = 15,
+                TextAnchor = SvgTextAnchor.Start,
+                FontWeight = SvgFontWeight.Normal,
+                Color = new SvgColourServer(Color.Blue),
+                X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 2) },
+                Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 15) },
+            });
+        }
+
+        if (footer != null)
+        {
+            doc.Children.Add(new SvgText(footer)
+            {
+                FontSize = 15,
+                TextAnchor = SvgTextAnchor.Start,
+                FontWeight = SvgFontWeight.Normal,
+                Color = new SvgColourServer(Color.Blue),
+                X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 2) },
+                Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 64) },
+            });
+        }
 
         if (BadgeImageFilePath != null) 
         {
@@ -104,4 +130,67 @@ class IconCreator
         
         return reader.ReadToEnd();
     }
+}
+
+class AnimatedIcon
+{
+    private IconCreator _iconCreator;
+    private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+    public AnimatedIcon(string badgeImageFilePath)
+    {
+        _iconCreator = new IconCreator(badgeImageFilePath);
+    }
+
+    public int Count { get; set; }
+    public Color BackgroundColor { get; set; }
+    public string? Header { get; set; }
+    public string? Footer { get; set; }
+
+    public Func<string, Task> OnIconCreated { get; set; } = content => Task.CompletedTask;
+
+    public async void AnimateFooter()
+    {
+        _cancellationTokenSource = new CancellationTokenSource();
+        var token = _cancellationTokenSource.Token;
+
+        for(;;)
+        {
+            if (Footer != null)
+            {
+                for (var i = 0; i < Footer.Length; i++)
+                {
+                    var animatedContent = _iconCreator.CreateNotificationSvg(
+                                            Count,
+                                            BackgroundColor,
+                                            header: Header,
+                                            footer: Footer.Substring(i));
+
+                    if (token.IsCancellationRequested)
+                        return;
+
+                    await OnIconCreated(animatedContent);
+
+                    await Task.Delay(200);
+                }
+            }
+
+            await Task.Delay(1000);
+
+            var content = _iconCreator.CreateNotificationSvg(
+                            Count,
+                            BackgroundColor,
+                            header: Header,
+                            footer: Footer);
+
+            if (token.IsCancellationRequested)
+                return;
+
+            await OnIconCreated(content);
+
+            await Task.Delay(5000);
+        }
+    }
+
+    public void CancelAnimation() => _cancellationTokenSource.Cancel();
 }
