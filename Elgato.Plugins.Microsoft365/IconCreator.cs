@@ -37,7 +37,7 @@ class IconCreator
             FontWeight = SvgFontWeight.Bold,
             Color = new SvgColourServer(Color.Blue),
             X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 36) },
-            Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 48.5f) },
+            Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 46.5f) },
         });
 
         if (header != null)
@@ -62,7 +62,7 @@ class IconCreator
                 FontWeight = SvgFontWeight.Normal,
                 Color = new SvgColourServer(Color.Blue),
                 X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 2) },
-                Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 64) },
+                Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 66) },
             });
         }
 
@@ -158,7 +158,7 @@ class AnimatedIcon
         {
             if (Footer != null)
             {
-                for (var i = 0; i < Footer.Length; i++)
+                for (var i = 0; i < Footer.Length - 6; i++)
                 {
                     var animatedContent = _iconCreator.CreateNotificationSvg(
                                             Count,

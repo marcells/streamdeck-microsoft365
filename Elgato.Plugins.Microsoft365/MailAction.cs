@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Drawing;
 using BarRaider.SdTools;
 using Newtonsoft.Json;
-using Svg;
 
 namespace Elgato.Plugins.Microsoft365;
 
@@ -20,6 +19,7 @@ public class MailPluginSettings : IPluginSettings
 [PluginActionId("es.mspi.microsoft.mail")]
 public class MailAction : GraphAction<MailPluginSettings>
 {
+    private AnimatedIcon? _animatedIcon;
     private DateTime _lastCheck = DateTime.Now.AddDays(-1);
 
     public MailAction(ISDConnection connection, InitialPayload payload)
@@ -48,6 +48,13 @@ public class MailAction : GraphAction<MailPluginSettings>
         await TryUpdateBadge(true);
     }
 
+    public override void Dispose()
+    {
+        _animatedIcon?.CancelAnimation();
+
+        base.Dispose();
+    }
+
     public override async void OnTick()
     {
         await TryUpdateBadge(false);
@@ -72,6 +79,24 @@ public class MailAction : GraphAction<MailPluginSettings>
 
     private static Color GetBackgroundColorForNumberOfMails(int numberOfMails) => numberOfMails == 0? Color.LightGray : Color.Yellow;
     
+    private async Task<string?> TryGetSubjectOfLatestMail()
+    {
+        var mails = await GraphApp
+            .Me
+            .MailFolders["Inbox"]
+            .Messages
+            .GetAsync(x =>
+            {
+                x.QueryParameters.Filter = "isread eq false";
+                x.QueryParameters.Orderby = new[] { "receiveddatetime DESC" };
+            });
+
+        var messages = mails?.Value ?? new List<Microsoft.Graph.Models.Message>();
+        var subject = messages.Select(x => $"{(x.Subject ?? "No subject")} [{(x.From?.EmailAddress?.Name ?? x.From?.EmailAddress?.Address ?? "Unknown")}]").FirstOrDefault();
+
+        return subject;
+    }
+
     private async Task UpdateBadge()
     {
         var result = await GraphApp
@@ -86,15 +111,25 @@ public class MailAction : GraphAction<MailPluginSettings>
 
         var numberOfMails = result.GetValueOrDefault();
 
-        var iconCreator = new IconCreator("Assets\\mail.png");
+        var subject = numberOfMails > 0 ? await TryGetSubjectOfLatestMail() : null;
 
-        var content = iconCreator.CreateNotificationSvg(numberOfMails, GetBackgroundColorForNumberOfMails(numberOfMails));
+        _animatedIcon?.CancelAnimation();
 
-        await Connection.SetImageAsync($"data:image/svg+xml;charset=utf8,{content}");
+        _animatedIcon = new AnimatedIcon("Assets\\mail.png")
+        {
+            Count = numberOfMails,
+            BackgroundColor = GetBackgroundColorForNumberOfMails(numberOfMails),
+            Footer = subject,
+            OnIconCreated = async content => await Connection.SetImageAsync($"data:image/svg+xml;charset=utf8,{content}"),
+        };
+
+        _animatedIcon.AnimateFooter();
     }
 
     private async Task NoConnectionInfo()
     {
+        _animatedIcon?.CancelAnimation();
+
         var iconCreator = new IconCreator("Assets\\mail.png");
 
         var content = iconCreator.CreateNoConnectionSvg();
