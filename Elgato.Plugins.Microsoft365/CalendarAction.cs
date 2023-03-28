@@ -37,8 +37,6 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
         if (!IsGraphApiInitialized)
             return;
 
-        base.KeyPressed(payload);
-
         Process.Start(new ProcessStartInfo { FileName = $"https://outlook.live.com/calendar", UseShellExecute = true });
 
         await TryUpdateBadge(true);
@@ -134,105 +132,18 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
             ? DateTime.Now - currentEvent.StartTime
             : (TimeSpan?)null;
         
-        var doc = new SvgDocument
-        {
-            Width = 72,
-            Height = 72,
-            ViewBox = new SvgViewBox(0, 0, 72, 72),
-        };
+        var iconCreator = new IconCreator("Assets\\calendar.png");
 
-        doc.Children.Add(new SvgRectangle()
-        {
-            Fill = new SvgColourServer(GetBackgroundColorForEventTimes(nextEventStartsIn, currentEventRunningFor)),
-            X = 0,
-            Y = 0,
-            Height = 72,
-            Width = 72,
-        });
-
-        doc.Children.Add(new SvgText(result.ToString())
-        {
-            FontSize = 25,
-            TextAnchor = SvgTextAnchor.Middle,
-            FontWeight = SvgFontWeight.Bold,
-            Color = new SvgColourServer(Color.Blue),
-            X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 36) },
-            Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 48.5f) },
-        });
-
-        if (nextEvent != null)
-        {
-            doc.Children.Add(new SvgText(nextEvent.StartTime.ToShortTimeString())
-            {
-                FontSize = 15,
-                TextAnchor = SvgTextAnchor.Start,
-                FontWeight = SvgFontWeight.Normal,
-                Color = new SvgColourServer(Color.Blue),
-                X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 2) },
-                Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 15) },
-            });
-        }
-
-        var imageContent = Convert.ToBase64String(File.ReadAllBytes("Assets\\calendar.png"));
-        doc.Children.Add(new SvgImage() {
-            Href = $"data:image/png;base64,{imageContent}",
-            Width = 25,
-            Height = 25,
-            X = new SvgUnit(SvgUnitType.Pixel, 46),
-            Y = new SvgUnit(SvgUnitType.Pixel, 1),
-        });
-
-        using MemoryStream ms = new MemoryStream();
-        doc.Write(ms);
-        ms.Position = 0;
-        using var reader = new StreamReader(ms, System.Text.Encoding.UTF8);
-        var content = reader.ReadToEnd();
+        var content = iconCreator.CreateNotificationSvg(result, GetBackgroundColorForEventTimes(nextEventStartsIn, currentEventRunningFor));
 
         await Connection.SetImageAsync($"data:image/svg+xml;charset=utf8,{content}");
     }
 
     private async Task NoConnectionInfo()
     {
-        var doc = new SvgDocument
-        {
-            Width = 72,
-            Height = 72,
-            ViewBox = new SvgViewBox(0, 0, 72, 72),
-        };
+        var iconCreator = new IconCreator("Assets\\calendar.png");
 
-        doc.Children.Add(new SvgRectangle()
-        {
-            Fill = new SvgColourServer(Color.LightGray),
-            X = 0,
-            Y = 0,
-            Height = 72,
-            Width = 72,
-        });
-
-        doc.Children.Add(new SvgText(("Nope"))
-        {
-            FontSize = 25,
-            TextAnchor = SvgTextAnchor.Middle,
-            FontWeight = SvgFontWeight.Bold,
-            Color = new SvgColourServer(Color.Blue),
-            X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 36) },
-            Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 48.5f) },
-        });
-
-        var imageContent = Convert.ToBase64String(File.ReadAllBytes("Assets\\calendar.png"));
-        doc.Children.Add(new SvgImage() {
-            Href = $"data:image/png;base64,{imageContent}",
-            Width = 25,
-            Height = 25,
-            X = new SvgUnit(SvgUnitType.Pixel, 46),
-            Y = new SvgUnit(SvgUnitType.Pixel, 1),
-        });
-
-        using MemoryStream ms = new MemoryStream();
-        doc.Write(ms);
-        ms.Position = 0;
-        using var reader = new StreamReader(ms, System.Text.Encoding.UTF8);
-        var content = reader.ReadToEnd();
+        var content = iconCreator.CreateNoConnectionSvg();
 
         await Connection.SetImageAsync($"data:image/svg+xml;charset=utf8,{content}");
     }
