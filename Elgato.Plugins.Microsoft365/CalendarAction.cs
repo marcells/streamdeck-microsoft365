@@ -91,12 +91,12 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
             return events?.Value != null ? events.Value : Enumerable.Empty<Microsoft.Graph.Models.Event>().ToList();
         }
 
-        var today = await TryGetEventsForDateRange(DateTime.UtcNow, DateTime.UtcNow.Date.AddDays(1));
+        var today = await TryGetEventsForDateRange(DateTime.Now.ToUniversalTime(), DateTime.Now.Date.AddDays(1).AddMinutes(-1).ToUniversalTime());
         
         if (today.Any())
             return today;
 
-        var tomorrow = await TryGetEventsForDateRange(DateTime.UtcNow.Date.AddDays(1), DateTime.UtcNow.Date.AddDays(2));
+        var tomorrow = await TryGetEventsForDateRange(DateTime.Now.Date.AddDays(1).ToUniversalTime(), DateTime.Now.Date.AddDays(2).AddMinutes(-1).ToUniversalTime());
 
         return tomorrow;
     }
