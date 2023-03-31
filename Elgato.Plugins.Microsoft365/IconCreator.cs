@@ -151,7 +151,6 @@ class AnimatedIcon
 
     public async void AnimateFooter()
     {
-        _cancellationTokenSource = new CancellationTokenSource();
         var token = _cancellationTokenSource.Token;
 
         for(;;)
@@ -193,4 +192,44 @@ class AnimatedIcon
     }
 
     public void CancelAnimation() => _cancellationTokenSource.Cancel();
+}
+
+class AnimatedIconLoader
+{
+    private readonly object _lockObject = new object();
+    private bool _isDisposed = false;
+    private AnimatedIcon? _animatedIcon;
+
+    public void LoadAndAnimate(AnimatedIcon animatedIcon)
+    {
+        lock(_lockObject)
+        {
+            if (_isDisposed)
+                return;
+
+            _animatedIcon?.CancelAnimation();
+
+            _animatedIcon = animatedIcon;
+            _animatedIcon.AnimateFooter();
+        }
+    }
+
+    public void CancelAnimation()
+    {
+        lock(_lockObject)
+        {
+            _animatedIcon?.CancelAnimation();
+        }
+    }
+
+    public void Dispose()
+    {
+        lock(_lockObject)
+        {
+            _animatedIcon?.CancelAnimation();
+            _animatedIcon = null;
+
+            _isDisposed = true;
+        }
+    }
 }

@@ -19,7 +19,7 @@ public class MailPluginSettings : IPluginSettings
 [PluginActionId("es.mspi.microsoft.mail")]
 public class MailAction : GraphAction<MailPluginSettings>
 {
-    private AnimatedIcon? _animatedIcon;
+    private readonly AnimatedIconLoader _animatedIconLoader = new AnimatedIconLoader();
     private DateTime _lastCheck = DateTime.Now.AddDays(-1);
 
     public MailAction(ISDConnection connection, InitialPayload payload)
@@ -50,7 +50,7 @@ public class MailAction : GraphAction<MailPluginSettings>
 
     public override void Dispose()
     {
-        _animatedIcon?.CancelAnimation();
+        _animatedIconLoader.Dispose();
 
         base.Dispose();
     }
@@ -113,22 +113,18 @@ public class MailAction : GraphAction<MailPluginSettings>
 
         var subject = numberOfMails > 0 ? await TryGetSubjectOfLatestMail() : null;
 
-        _animatedIcon?.CancelAnimation();
-
-        _animatedIcon = new AnimatedIcon("Assets\\mail.png")
+        _animatedIconLoader.LoadAndAnimate(new AnimatedIcon("Assets\\mail.png")
         {
             Count = numberOfMails,
             BackgroundColor = GetBackgroundColorForNumberOfMails(numberOfMails),
             Footer = subject,
             OnIconCreated = async content => await Connection.SetImageAsync($"data:image/svg+xml;charset=utf8,{content}"),
-        };
-
-        _animatedIcon.AnimateFooter();
+        });
     }
 
     private async Task NoConnectionInfo()
     {
-        _animatedIcon?.CancelAnimation();
+        _animatedIconLoader.CancelAnimation();
 
         var iconCreator = new IconCreator("Assets\\mail.png");
 

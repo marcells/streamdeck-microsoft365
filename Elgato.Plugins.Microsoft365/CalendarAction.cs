@@ -2,7 +2,6 @@ using System.Diagnostics;
 using System.Drawing;
 using BarRaider.SdTools;
 using Newtonsoft.Json;
-using Svg;
 
 namespace Elgato.Plugins.Microsoft365;
 
@@ -20,7 +19,7 @@ public class CalendarPluginSettings : IPluginSettings
 [PluginActionId("es.mspi.microsoft.calendar")]
 public class CalendarAction : GraphAction<CalendarPluginSettings>
 {
-    private AnimatedIcon? _animatedIcon;
+    private readonly AnimatedIconLoader _animatedIconLoader = new AnimatedIconLoader();
     private DateTime _lastCheck = DateTime.Now.AddDays(-1);
 
     public CalendarAction(ISDConnection connection, InitialPayload payload)
@@ -45,7 +44,7 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
 
     public override void Dispose()
     {
-        _animatedIcon?.CancelAnimation();
+        _animatedIconLoader.Dispose();
 
         base.Dispose();
     }
@@ -124,11 +123,23 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
 
         var result = results.Count;
 
+        static DateTime ParseDateTimeByEvent(Microsoft.Graph.Models.Event @event, bool isEndDate)
+        {
+            var dateTimeTimeZone = isEndDate ? @event.End! : @event.Start!;
+            var isAllDayEvent = @event.IsAllDay.GetValueOrDefault();
+
+            var date = isAllDayEvent
+                ? DateTime.Parse(dateTimeTimeZone!.DateTime!).Date
+                : DateTime.Parse(dateTimeTimeZone!.DateTime!).ToLocalTime();
+
+            return isEndDate && isAllDayEvent ? date.AddDays(1).AddMinutes(-1) : date;
+        }
+
         var times = results
             .Select(x => new 
             { 
-                StartTime = DateTime.Parse(x.Start!.DateTime!).ToLocalTime(),
-                EndTime = DateTime.Parse(x.End!.DateTime!).ToLocalTime(),
+                StartTime = ParseDateTimeByEvent(x, false),
+                EndTime = ParseDateTimeByEvent(x, true),
                 Subject = x.Subject,
             })
             .OrderBy(x => x.StartTime)
@@ -145,23 +156,19 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
             ? DateTime.Now - currentEvent.StartTime
             : (TimeSpan?)null;
         
-        _animatedIcon?.CancelAnimation();
-
-        _animatedIcon = new AnimatedIcon("Assets\\calendar.png")
+        _animatedIconLoader.LoadAndAnimate(new AnimatedIcon("Assets\\calendar.png")
         {
             Count = result,
             BackgroundColor = GetBackgroundColorForEventTimes(nextEventStartsIn, currentEventRunningFor),
             Header = nextEvent?.StartTime.ToShortTimeString(),
             Footer = nextEvent?.Subject,
             OnIconCreated = async content => await Connection.SetImageAsync($"data:image/svg+xml;charset=utf8,{content}"),
-        };
-
-        _animatedIcon.AnimateFooter();
+        });
     }
 
     private async Task NoConnectionInfo()
     {
-        _animatedIcon?.CancelAnimation();
+        _animatedIconLoader.CancelAnimation();
 
         var iconCreator = new IconCreator("Assets\\calendar.png");
 
