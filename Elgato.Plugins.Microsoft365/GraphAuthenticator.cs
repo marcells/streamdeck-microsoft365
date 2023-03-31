@@ -161,13 +161,13 @@ static class AppConfig
 
 static class TokenCacheConfig
 {
-    public const string CacheFileName = "myapp_msal_cache.txt";
+    public const string CacheFileName = "es.mspi.elgato.plugins.microsoft_msal_cache.txt";
     public readonly static string CacheDir = MsalCacheHelper.UserRootDirectory;
 
-    public const string KeyChainServiceName = "myapp_msal_service";
-    public const string KeyChainAccountName = "myapp_msal_account";
+    public const string KeyChainServiceName = "es.mspi.elgato.plugins.microsoft_msal_service";
+    public const string KeyChainAccountName = "es.mspi.elgato.plugins.microsoft_msal_account";
 
-    public const string LinuxKeyRingSchema = "es.mspies.microsoft.tokencache";
+    public const string LinuxKeyRingSchema = "es.mspi.elgato.plugins.microsoft.tokencache";
     public const string LinuxKeyRingCollection = MsalCacheHelper.LinuxKeyRingDefaultCollection;
     public const string LinuxKeyRingLabel = "MSAL token cache for all Elgato Stream Deck Microsoft 365 action.";
     public static readonly KeyValuePair<string, string> LinuxKeyRingAttr1 = new KeyValuePair<string, string>("Version", "1");

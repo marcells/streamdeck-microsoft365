@@ -12,7 +12,7 @@
       ],
       "SupportedInMultiActions": false,
       "Tooltip": "Shows number of mails in your inbox with a preview of the latest mail.",
-      "UUID": "es.mspi.microsoft.mail",
+      "UUID": "es.mspi.elgato.plugins.microsoft.mail",
       "PropertyInspectorPath": "PropertyInspector/MailAction/Index.html"
     },
     {
@@ -27,7 +27,7 @@
       ],
       "SupportedInMultiActions": false,
       "Tooltip": "Shows number of events for today with a preview of the next event.",
-      "UUID": "es.mspi.microsoft.calendar",
+      "UUID": "es.mspi.elgato.plugins.microsoft.calendar",
       "PropertyInspectorPath": "PropertyInspector/CalendarAction/Index.html"
     }
   ],
@@ -40,7 +40,7 @@
   "CodePath": "Elgato.Plugins.Microsoft365.exe",
   "Category": "Microsoft 365",
   "CategoryIcon": "Images/categoryIcon",
-  "UUID": "es.mspies.microsoft",
+  "UUID": "es.mspi.elgato.plugins.microsoft",
   "OS": [
     {
       "Platform": "windows",

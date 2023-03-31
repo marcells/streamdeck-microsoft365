@@ -16,7 +16,7 @@ public class CalendarPluginSettings : IPluginSettings
     public string? Account { get; set; }
 }
 
-[PluginActionId("es.mspi.microsoft.calendar")]
+[PluginActionId("es.mspi.elgato.plugins.microsoft.calendar")]
 public class CalendarAction : GraphAction<CalendarPluginSettings>
 {
     private readonly AnimatedIconLoader _animatedIconLoader = new AnimatedIconLoader();

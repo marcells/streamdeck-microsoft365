@@ -16,7 +16,7 @@ public class MailPluginSettings : IPluginSettings
     public string? Account { get; set; }
 }
 
-[PluginActionId("es.mspi.microsoft.mail")]
+[PluginActionId("es.mspi.elgato.plugins.microsoft.mail")]
 public class MailAction : GraphAction<MailPluginSettings>
 {
     private readonly AnimatedIconLoader _animatedIconLoader = new AnimatedIconLoader();
