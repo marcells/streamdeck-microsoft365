@@ -4,9 +4,9 @@ Elgato Stream Deck Plugin for Microsoft 365
 
 ## Setup
 
-The plugin uses the Microsoft Graph API for accessing the necessary information.
+The plugin uses the Microsoft Graph API for accessing the necessary information. You have to create an App first to use this Plugin.
 
-1. You have to create an App first to use this Plugin: https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app
+1. Follow [this documentation](docs/CreateAzureApp.md) to create the app and then resume with next point.
 
 2. After creating the app, you have to copy the "Application (client) ID" and paste it in the Stream Deck Plugin configuration for the button.
 ![Application ID](app_id.png)
