@@ -97,7 +97,9 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase, IAction
     private async Task RemoveSelectedAccount()
     {
         if (string.IsNullOrWhiteSpace(Settings.Account))
+        {
             return;
+        }
 
         var accountId = Settings.Account;
         await RemoveAccount(accountId);
@@ -108,7 +110,9 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase, IAction
     private async Task RemoveAccount(string? accountId)
     {
         if (string.IsNullOrWhiteSpace(accountId))
+        {
             return;
+        }
 
         if (Settings.Account?.ToLowerInvariant() == accountId?.ToLowerInvariant())
         {
@@ -116,7 +120,9 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase, IAction
             await Connection.SetSettingsAsync(JObject.FromObject(Settings));
 
             if (_graphAuthenticator != null)
+            {
                 await _graphAuthenticator.RemoveAccount(accountId);
+            }
 
             await SendAccountsToPropertyInspector();
         }
@@ -128,7 +134,9 @@ public abstract class GraphAction<TSettings> : KeyAndEncoderBase, IAction
         await SendAccountsToPropertyInspector();
         
         if (string.IsNullOrWhiteSpace(Settings?.AppId) || string.IsNullOrWhiteSpace(Settings?.Account))
+        {
             return;
+        }
 
         await _graphAuthenticator.InitializeAsync();
 

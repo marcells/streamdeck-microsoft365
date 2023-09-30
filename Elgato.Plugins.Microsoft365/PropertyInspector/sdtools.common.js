@@ -1,9 +1,9 @@
-﻿var websocket = null,
+﻿let websocket = null,
     uuid = null,
     registerEventName = null,
     actionInfo = {},
-    inInfo = {},
-    runningApps = [],
+    inInfo = {};
+const runningApps = [],
     isQT = navigator.appVersion.includes('QtWebEngine');
 
 function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
@@ -21,7 +21,7 @@ function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, 
 }
 
 function websocketOnOpen() {
-    var json = {
+    const json = {
         event: registerEventName,
         uuid: uuid
     };
@@ -33,14 +33,13 @@ function websocketOnOpen() {
 
 function websocketOnMessage(evt) {
     // Received message from Stream Deck
-    var jsonObj = JSON.parse(evt.data);
+    const jsonObj = JSON.parse(evt.data);
+    let payload = jsonObj.payload;
 
     if (jsonObj.event === 'sendToPropertyInspector') {
-        var payload = jsonObj.payload;
         handleSendToPropertyInspector(payload);
     }
     else if (jsonObj.event === 'didReceiveSettings') {
-        var payload = jsonObj.payload;
         loadConfiguration(payload.settings);
     }
     else {
@@ -49,7 +48,7 @@ function websocketOnMessage(evt) {
 }
 
 function handleSendToPropertyInspector(payload) {
-    if (payload.message == 'accountsLoaded')
+    if (payload.message === 'accountsLoaded')
         loadAccounts(payload.data);
     else
         loadConfiguration(payload);
@@ -58,9 +57,9 @@ function handleSendToPropertyInspector(payload) {
 function loadConfiguration(payload) {
     console.log('loadConfiguration');
     console.log(payload);
-    for (var key in payload) {
+    for (let key in payload) {
         try {
-            var elem = document.getElementById(key);
+            const elem = document.getElementById(key);
             if (elem.classList.contains("sdCheckbox")) { // Checkbox
                 elem.checked = payload[key];
             }
@@ -79,8 +78,8 @@ function loadConfiguration(payload) {
 }
 
 function loadAccounts(payload) {
-    var accounts = payload.accounts;
-    var accountElement = document.getElementById("account");
+    const accounts = payload.accounts;
+    const accountElement = document.getElementById("account");
 
     accountElement.innerText = null;
 
@@ -101,11 +100,11 @@ function loadAccounts(payload) {
 }
 
 function setSettings() {
-    var payload = {};
-    var elements = document.getElementsByClassName("sdProperty");
+    const payload = {};
+    const elements = document.getElementsByClassName("sdProperty");
 
     Array.prototype.forEach.call(elements, function (elem) {
-        var key = elem.id;
+        const key = elem.id;
         if (elem.classList.contains("sdCheckbox")) { // Checkbox
             payload[key] = elem.checked;
         }
@@ -174,7 +173,11 @@ window.addEventListener('beforeunload', function (e) {
 });
 
 function initPropertyInspector() {
-    // Place to add functions
+    if (document.getElementById('openApp').checked) {
+        document.getElementById('appPath-setting').style.display = 'block';
+    } else {
+        document.getElementById('appPath-setting').style.display = 'none';
+    }
 }
 
 

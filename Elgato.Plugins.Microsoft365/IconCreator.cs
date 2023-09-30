@@ -1,18 +1,19 @@
 using System.Drawing;
+using System.Drawing.Imaging;
 using Svg;
 
 namespace Elgato.Plugins.Microsoft365;
 
 class IconCreator
 {
-    public IconCreator(string badgeImageFilePath)
+    public IconCreator(string? badgeImageFilePath)
     {
-        BadgeImageFilePath = badgeImageFilePath;        
+        BadgeImageFilePath = badgeImageFilePath;
     }
 
-    public string BadgeImageFilePath { get; init; }
+    public string? BadgeImageFilePath { get; init; }
 
-    public string CreateNotificationSvg(int count, Color backgroundColor, string? header = null, string? footer = null)
+    public string CreateNotificationSvg(int count, Color foregroundColor, Color backgroundColor, string? header = null, string? footer = null)
     {
         var doc = new SvgDocument
         {
@@ -21,7 +22,7 @@ class IconCreator
             ViewBox = new SvgViewBox(0, 0, 72, 72),
         };
 
-        doc.Children.Add(new SvgRectangle()
+        doc.Children.Add(new SvgRectangle
         {
             Fill = new SvgColourServer(backgroundColor),
             X = 0,
@@ -35,9 +36,9 @@ class IconCreator
             FontSize = 25,
             TextAnchor = SvgTextAnchor.Middle,
             FontWeight = SvgFontWeight.Bold,
-            Color = new SvgColourServer(Color.Blue),
-            X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 36) },
-            Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 46.5f) },
+            Fill = new SvgColourServer(foregroundColor),
+            X = new SvgUnitCollection { new(SvgUnitType.Pixel, 36) },
+            Y = new SvgUnitCollection { new(SvgUnitType.Pixel, 46.5f) },
         });
 
         if (header != null)
@@ -47,9 +48,9 @@ class IconCreator
                 FontSize = 15,
                 TextAnchor = SvgTextAnchor.Start,
                 FontWeight = SvgFontWeight.Normal,
-                Color = new SvgColourServer(Color.Blue),
-                X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 2) },
-                Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 15) },
+                Fill = new SvgColourServer(foregroundColor),
+                X = new SvgUnitCollection { new(SvgUnitType.Pixel, 2) },
+                Y = new SvgUnitCollection { new(SvgUnitType.Pixel, 15) },
             });
         }
 
@@ -60,16 +61,17 @@ class IconCreator
                 FontSize = 15,
                 TextAnchor = SvgTextAnchor.Start,
                 FontWeight = SvgFontWeight.Normal,
-                Color = new SvgColourServer(Color.Blue),
-                X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 2) },
-                Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 66) },
+                Fill = new SvgColourServer(foregroundColor),
+                X = new SvgUnitCollection { new(SvgUnitType.Pixel, 2) },
+                Y = new SvgUnitCollection { new(SvgUnitType.Pixel, 66) },
             });
         }
 
-        if (BadgeImageFilePath != null) 
+        if (BadgeImageFilePath != null)
         {
             var imageContent = Convert.ToBase64String(File.ReadAllBytes(BadgeImageFilePath));
-            doc.Children.Add(new SvgImage() {
+            doc.Children.Add(new SvgImage
+            {
                 Href = $"data:image/png;base64,{imageContent}",
                 Width = 25,
                 Height = 25,
@@ -82,11 +84,11 @@ class IconCreator
         doc.Write(ms);
         ms.Position = 0;
         using var reader = new StreamReader(ms, System.Text.Encoding.UTF8);
-     
+
         return reader.ReadToEnd();
     }
 
-    public string CreateNoConnectionSvg()
+    public string CreateNoConnectionSvg(string text, Color textColor, Color backgroundColor)
     {
         var doc = new SvgDocument
         {
@@ -95,78 +97,86 @@ class IconCreator
             ViewBox = new SvgViewBox(0, 0, 72, 72),
         };
 
-        doc.Children.Add(new SvgRectangle()
+        doc.Children.Add(new SvgRectangle
         {
-            Fill = new SvgColourServer(Color.LightGray),
+            Fill = new SvgColourServer(backgroundColor),
             X = 0,
             Y = 0,
             Height = 72,
             Width = 72,
         });
 
-        doc.Children.Add(new SvgText(("Nope"))
+        doc.Children.Add(new SvgText(text)
         {
             FontSize = 25,
             TextAnchor = SvgTextAnchor.Middle,
             FontWeight = SvgFontWeight.Bold,
-            Color = new SvgColourServer(Color.Blue),
-            X = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 36) },
-            Y = new SvgUnitCollection { new SvgUnit(SvgUnitType.Pixel, 48.5f) },
+            Fill = new SvgColourServer(textColor),
+            X = new SvgUnitCollection { new(SvgUnitType.Pixel, 36) },
+            Y = new SvgUnitCollection { new(SvgUnitType.Pixel, 48.5f) },
         });
 
-        var imageContent = Convert.ToBase64String(File.ReadAllBytes(BadgeImageFilePath));
-        doc.Children.Add(new SvgImage() {
-            Href = $"data:image/png;base64,{imageContent}",
-            Width = 25,
-            Height = 25,
-            X = new SvgUnit(SvgUnitType.Pixel, 46),
-            Y = new SvgUnit(SvgUnitType.Pixel, 1),
-        });
+        if (BadgeImageFilePath != null)
+        {
+            var imageContent = Convert.ToBase64String(File.ReadAllBytes(BadgeImageFilePath));
+            doc.Children.Add(new SvgImage
+            {
+                Href = $"data:image/png;base64,{imageContent}",
+                Width = 25,
+                Height = 25,
+                X = new SvgUnit(SvgUnitType.Pixel, 46),
+                Y = new SvgUnit(SvgUnitType.Pixel, 1),
+            });
+        }
 
-        using MemoryStream ms = new MemoryStream();
+        using var ms = new MemoryStream();
         doc.Write(ms);
         ms.Position = 0;
         using var reader = new StreamReader(ms, System.Text.Encoding.UTF8);
-        
+
         return reader.ReadToEnd();
     }
 }
 
 class AnimatedIcon
 {
-    private IconCreator _iconCreator;
-    private CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+    private readonly IconCreator _iconCreator;
+    private readonly CancellationTokenSource _cancellationTokenSource = new();
 
-    public AnimatedIcon(string badgeImageFilePath)
+    public AnimatedIcon(string? badgeImageFilePath)
     {
         _iconCreator = new IconCreator(badgeImageFilePath);
     }
 
     public int Count { get; set; }
+    public Color ForegroundColor { get; set; } = Color.White;
     public Color BackgroundColor { get; set; }
     public string? Header { get; set; }
     public string? Footer { get; set; }
 
     public Func<string, Task> OnIconCreated { get; set; } = content => Task.CompletedTask;
 
-    public async void AnimateFooter()
+    public async Task AnimateFooter()
     {
         var token = _cancellationTokenSource.Token;
 
-        for(;;)
+        while (!token.IsCancellationRequested)
         {
             if (Footer != null)
             {
                 for (var i = 0; i < Footer.Length - 6; i++)
                 {
                     var animatedContent = _iconCreator.CreateNotificationSvg(
-                                            Count,
-                                            BackgroundColor,
-                                            header: Header,
-                                            footer: Footer.Substring(i));
+                        Count,
+                        ForegroundColor,
+                        BackgroundColor,
+                        header: Header,
+                        footer: Footer[i..]);
 
                     if (token.IsCancellationRequested)
+                    {
                         return;
+                    }
 
                     await OnIconCreated(animatedContent);
 
@@ -177,13 +187,16 @@ class AnimatedIcon
             await Task.Delay(1000);
 
             var content = _iconCreator.CreateNotificationSvg(
-                            Count,
-                            BackgroundColor,
-                            header: Header,
-                            footer: Footer);
+                Count,
+                ForegroundColor,
+                BackgroundColor,
+                header: Header,
+                footer: Footer);
 
             if (token.IsCancellationRequested)
+            {
                 return;
+            }
 
             await OnIconCreated(content);
 
@@ -194,7 +207,7 @@ class AnimatedIcon
     public void CancelAnimation() => _cancellationTokenSource.Cancel();
 }
 
-class AnimatedIconLoader
+class AnimatedIconLoader : IDisposable
 {
     private readonly object _lockObject = new object();
     private bool _isDisposed = false;
@@ -202,10 +215,12 @@ class AnimatedIconLoader
 
     public void LoadAndAnimate(AnimatedIcon animatedIcon)
     {
-        lock(_lockObject)
+        lock (_lockObject)
         {
             if (_isDisposed)
+            {
                 return;
+            }
 
             _animatedIcon?.CancelAnimation();
 
@@ -216,7 +231,7 @@ class AnimatedIconLoader
 
     public void CancelAnimation()
     {
-        lock(_lockObject)
+        lock (_lockObject)
         {
             _animatedIcon?.CancelAnimation();
         }
@@ -224,7 +239,7 @@ class AnimatedIconLoader
 
     public void Dispose()
     {
-        lock(_lockObject)
+        lock (_lockObject)
         {
             _animatedIcon?.CancelAnimation();
             _animatedIcon = null;
