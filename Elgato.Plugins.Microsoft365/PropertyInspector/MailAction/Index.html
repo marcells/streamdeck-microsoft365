@@ -31,12 +31,90 @@
             </select>
         </div>
 
+        <div class="sdpi-item" id="unreadColor-setting">
+            <div class="sdpi-item-label">Unread Background Color</div>
+            <div class="sdpi-item-value">
+                <input type="color" class="sdProperty" id="unreadColor" onchange="setSettings()">
+            </div>
+            <div class="sdpi-item-label">Unread Text Color</div>
+            <div class="sdpi-item-value">
+                <input type="color" class="sdProperty" id="unreadTextColor" onchange="setSettings()">
+            </div>
+        </div>
+
+        <div class="sdpi-item" id="readColor-setting">
+            <div class="sdpi-item-label">Read Background Color</div>
+            <div class="sdpi-item-value">
+                <input type="color" class="sdProperty" id="readColor" onchange="setSettings()"> 
+            </div>
+            <div class="sdpi-item-label">Read Text Color</div>
+            <div class="sdpi-item-value"> 
+                <input type="color" class="sdProperty" id="readTextColor" onchange="setSettings()">
+            </div>
+        </div>
+
+        <div class="sdpi-item" id="noConnectionColor-setting">
+            <div class="sdpi-item-label">No Connection Background Color</div>
+            <div class="sdpi-item-value">
+                <input type="color" class="sdProperty" id="noConnectionColor" onchange="setSettings()">
+            </div>
+            <div class="sdpi-item-label">No Connection Text Color</div>
+            <div class="sdpi-item-value">
+                <input type="color" class="sdProperty" id="noConnectionTextColor" onchange="setSettings()">
+            </div>
+        </div>
+
+        <div class="sdpi-item" id="badge-setting">
+            <div class="sdpi-item-label">Badge</div>
+            <div class="sdpi-item-value">
+                <div class="sdpi-item-child">
+                    <input id="showBadge" class="sdProperty sdCheckbox" type="checkbox" value="1" onchange="setSettings()">
+                    <label for="showBadge" class="sdpi-item-label"><span></span></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="sdpi-item" id="showTitle-setting">
+            <div class="sdpi-item-label">Show Mail Title</div>
+            <div class="sdpi-item-value">
+                <div class="sdpi-item-child">
+                    <input id="showTitle" class="sdProperty sdCheckbox" type="checkbox" value="1" onchange="setSettings()">
+                    <label for="showTitle" class="sdpi-item-label"><span></span></label>
+                </div>
+            </div>
+        </div>
+
+        <div class="sdpi-item" id="openApp-setting">
+            <div class="sdpi-item-label">Open App</div>
+            <div class="sdpi-item-value">
+                <div class="sdpi-item-child">
+                    <input id="openApp" class="sdProperty sdCheckbox" type="checkbox" value="1" onchange="openAppChanged()">
+                    <label for="openApp" class="sdpi-item-label"><span></span></label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="sdpi-item" id="appPath-setting">
+            <div class="sdpi-item-label">App Path</div>
+            <input id="appPath" class="sdpi-item-value sdProperty" type="text" value="C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE" oninput="setSettings()">
+        </div>
+
         <div class="sdpi-item">
             <div class="sdpi-item-label">Account actions</div>
             <button class="sdpi-item-value max50" id="add" onclick="sendValueToPlugin('add', 'operation')">Add</button>
             <button class="sdpi-item-value max50" id="reset" onclick="sendValueToPlugin('remove', 'operation')">Remove</button>
         </div>
     </div>
+    <script>
+        function openAppChanged() {
+            if (document.getElementById('openApp').checked) {
+                document.getElementById('appPath-setting').style.display = 'flex';
+            } else {
+                document.getElementById('appPath-setting').style.display = 'none';
+            }
+            setSettings();
+        }
+    </script>
     <script src="../sdtools.common.js"></script>
 </body>
 </html>

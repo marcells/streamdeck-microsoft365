@@ -35,7 +35,9 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
     public override async void KeyPressed(KeyPayload payload)
     {
         if (!IsGraphApiInitialized)
+        {
             return;
+        }
 
         Process.Start(new ProcessStartInfo { FileName = $"https://outlook.live.com/calendar", UseShellExecute = true });
 
@@ -93,7 +95,9 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
         var today = await TryGetEventsForDateRange(DateTime.Now.ToUniversalTime(), DateTime.Now.Date.AddDays(1).AddMinutes(-1).ToUniversalTime());
         
         if (today.Any())
+        {
             return today;
+        }
 
         var tomorrow = await TryGetEventsForDateRange(DateTime.Now.Date.AddDays(1).ToUniversalTime(), DateTime.Now.Date.AddDays(2).AddMinutes(-1).ToUniversalTime());
 
@@ -103,18 +107,32 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
     private static Color GetBackgroundColorForEventTimes(TimeSpan? nextEventStartsIn, TimeSpan? currentEventRunningFor)
     {
         if (currentEventRunningFor?.TotalMinutes < 3)
+        {
             return Color.Red;
+        }
 
         if (nextEventStartsIn?.TotalMinutes <= 3)
+        {
             return Color.Red;
+        }
 
         if (nextEventStartsIn?.TotalMinutes <= 15)
+        {
             return Color.OrangeRed;
-        
+        }
+
         if (!currentEventRunningFor.HasValue && !nextEventStartsIn.HasValue)
+        {
             return Color.LightGray;
+        }
 
         return Color.Yellow;
+    }
+
+    private Color GetForegroundColorForEventTimes(TimeSpan? nextEventStartsIn, TimeSpan? currentEventRunningFor)
+    {
+        // TODO: Implement Settings :)
+        return Color.White;
     }
 
     private async Task UpdateBadge()
@@ -145,8 +163,8 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
             .OrderBy(x => x.StartTime)
             .ToList();
 
-        var currentEvent = times.Where(x => x.StartTime < DateTime.Now && DateTime.Now < x.EndTime).FirstOrDefault();
-        var nextEvent = times.Where(x => x.StartTime > DateTime.Now).FirstOrDefault();
+        var currentEvent = times.FirstOrDefault(x => x.StartTime < DateTime.Now && DateTime.Now < x.EndTime);
+        var nextEvent = times.FirstOrDefault(x => x.StartTime > DateTime.Now);
 
         var nextEventStartsIn = nextEvent?.StartTime != null
             ? nextEvent.StartTime - DateTime.Now
@@ -159,6 +177,7 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
         _animatedIconLoader.LoadAndAnimate(new AnimatedIcon("Assets\\calendar.png")
         {
             Count = result,
+            ForegroundColor = GetForegroundColorForEventTimes(nextEventStartsIn, currentEventRunningFor),
             BackgroundColor = GetBackgroundColorForEventTimes(nextEventStartsIn, currentEventRunningFor),
             Header = nextEvent?.StartTime.ToShortTimeString(),
             Footer = nextEvent?.Subject,
@@ -172,7 +191,7 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
 
         var iconCreator = new IconCreator("Assets\\calendar.png");
 
-        var content = iconCreator.CreateNoConnectionSvg();
+        var content = iconCreator.CreateNoConnectionSvg("Conn", ColorTranslator.FromHtml("#F8F8F2"), ColorTranslator.FromHtml("#FF5555"));
 
         await Connection.SetImageAsync($"data:image/svg+xml;charset=utf8,{content}");
     }
