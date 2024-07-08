@@ -2,6 +2,10 @@
 
 Elgato Stream Deck Plugin for Microsoft 365
 
+## Preview Images
+
+![Mail Properties](./.github/images/mail-preview.png)
+
 ## Setup
 
 The plugin uses the Microsoft Graph API for accessing the necessary information. You have to create an App first to use this Plugin.

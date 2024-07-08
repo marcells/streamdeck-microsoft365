@@ -56,7 +56,9 @@ public class GraphAuthenticator
     public async Task InitializeAsync()
     {
         if (IsInitialized || string.IsNullOrWhiteSpace(_graphSettings.ClientId))
+        {
             return;
+        }
 
         try
         {
@@ -74,7 +76,9 @@ public class GraphAuthenticator
     public async Task<IReadOnlyDictionary<string, string>> GetAccounts()
     {
         if (string.IsNullOrWhiteSpace(_graphSettings.ClientId))
+        {
             return new Dictionary<string, string> { };
+        }
 
         var (app, _) = await GetAppAndCacheHelper();
 
@@ -86,7 +90,9 @@ public class GraphAuthenticator
     public async Task RemoveAccount(string? accountId)
     {
         if (string.IsNullOrWhiteSpace(_graphSettings.ClientId))
+        {
             return;
+        }
 
         var (app, _) = await GetAppAndCacheHelper();
 
@@ -94,7 +100,9 @@ public class GraphAuthenticator
         var account = accounts.SingleOrDefault(x => x.HomeAccountId.Identifier == accountId);
 
         if (account != null)
+        {
             await app.RemoveAsync(account);
+        }
 
         IsInitialized = false;
     }
@@ -102,8 +110,10 @@ public class GraphAuthenticator
     public GraphServiceClient GetApp() 
     {
         if (_userClient == null)
+        {
             throw new InvalidOperationException();
-        
+        }
+
         return _userClient;
     }
 }
