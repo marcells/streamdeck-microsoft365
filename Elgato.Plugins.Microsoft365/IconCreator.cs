@@ -164,7 +164,7 @@ class AnimatedIcon
         {
             if (Footer != null)
             {
-                for (var i = 0; i < Footer.Length - 6; i++)
+                for (var i = 0; i < Footer.Length - 6; i += System.Globalization.StringInfo.GetNextTextElement(Footer, i).Length)
                 {
                     var animatedContent = _iconCreator.CreateNotificationSvg(
                         Count,

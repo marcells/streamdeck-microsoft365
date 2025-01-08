@@ -132,7 +132,7 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
     private Color GetForegroundColorForEventTimes(TimeSpan? nextEventStartsIn, TimeSpan? currentEventRunningFor)
     {
         // TODO: Implement Settings :)
-        return Color.White;
+        return Color.Black;
     }
 
     private async Task UpdateBadge()
@@ -191,7 +191,7 @@ public class CalendarAction : GraphAction<CalendarPluginSettings>
 
         var iconCreator = new IconCreator("Assets\\calendar.png");
 
-        var content = iconCreator.CreateNoConnectionSvg("Conn", ColorTranslator.FromHtml("#F8F8F2"), ColorTranslator.FromHtml("#FF5555"));
+        var content = iconCreator.CreateNoConnectionSvg("None", Color.Black, Color.LightGray);
 
         await Connection.SetImageAsync($"data:image/svg+xml;charset=utf8,{content}");
     }

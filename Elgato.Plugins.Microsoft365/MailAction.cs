@@ -16,22 +16,22 @@ public class MailPluginSettings : IPluginSettings
     public string? Account { get; set; }
 
     [JsonProperty(PropertyName = "unreadColor")]
-    public string UnreadColor { get; set; } = "#f1fa8c";
+    public string UnreadColor { get; set; } = "#FFFF00";
 
     [JsonProperty(PropertyName = "unreadTextColor")]
-    public string UnreadTextColor { get; set; } = "#44475a";
+    public string UnreadTextColor { get; set; } = "#000000";
 
     [JsonProperty(PropertyName = "readColor")]
-    public string ReadColor { get; set; } = "#282a36";
+    public string ReadColor { get; set; } = "#D3D3D3";
 
     [JsonProperty(PropertyName = "readTextColor")]
-    public string ReadTextColor { get; set; } = "#F8F8F2";
+    public string ReadTextColor { get; set; } = "#000000";
 
     [JsonProperty(PropertyName = "noConnectionColor")]
-    public string NoConnectionColor { get; set; } = "#ff5555";
+    public string NoConnectionColor { get; set; } = "#D3D3D3";
 
     [JsonProperty(PropertyName = "noConnectionTextColor")]
-    public string NoConnectionTextColor { get; set; } = "#44475a";
+    public string NoConnectionTextColor { get; set; } = "#000000";
 
     [JsonProperty(PropertyName = "showBadge")]
     public bool ShowBadge { get; set; } = true;
@@ -200,7 +200,7 @@ public class MailAction : GraphAction<MailPluginSettings>
         var iconCreator = new IconCreator(badge);
 
         var content =
-            iconCreator.CreateNoConnectionSvg("Conn", ColorTranslator.FromHtml(Settings.NoConnectionTextColor), ColorTranslator.FromHtml(Settings.NoConnectionColor));
+            iconCreator.CreateNoConnectionSvg("Nope", ColorTranslator.FromHtml(Settings.NoConnectionTextColor), ColorTranslator.FromHtml(Settings.NoConnectionColor));
 
         await Connection.SetImageAsync($"data:image/svg+xml;charset=utf8,{content}");
     }
