@@ -7,7 +7,7 @@
         {
           "Image": "Images/bg",
           "TitleAlignment": "bottom",
-          "FontSize": "16"
+          "FontSize": 16
         }
       ],
       "SupportedInMultiActions": false,
@@ -22,7 +22,7 @@
         {
           "Image": "Images/bg",
           "TitleAlignment": "bottom",
-          "FontSize": "16"
+          "FontSize": 16
         }
       ],
       "SupportedInMultiActions": false,
@@ -36,7 +36,7 @@
   "Name": "Microsoft 365 Actions",
   "Icon": "Images/pluginIcon",
   "URL": "https://github.com/marcells/streamdeck-microsoft365",
-  "Version": "1.0",
+  "Version": "1.1.0.0",
   "CodePath": "Elgato.Plugins.Microsoft365.exe",
   "Category": "Microsoft 365",
   "CategoryIcon": "Images/categoryIcon",
@@ -49,6 +49,6 @@
   ],
   "SDKVersion": 2,
   "Software": {
-    "MinimumVersion": "4.1"
+    "MinimumVersion": "6.4"
   }
 }
