@@ -4,7 +4,7 @@ Elgato Stream Deck Plugin for Microsoft 365
 
 ## Preview Images
 
-![Mail Properties](./.github/images/mail-preview.png)
+![Mail Properties](./mail-preview.png)
 
 ## Setup
 
