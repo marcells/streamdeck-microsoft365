@@ -23,7 +23,7 @@ $targetFrameworkName = $projectXML.Project.PropertyGroup.TargetFramework;
 $streamDeckExePath = "$($ENV:ProgramFiles)\Elgato\StreamDeck\StreamDeck.exe"
 
 # For now, this PS script will only be run on Windows.
-$bindir = "$basePath\bin\Debug\$targetFrameworkName\win-x64"
+$bindir = "$basePath\bin\Debug\$targetFrameworkName\win-x64\publish"
 
 # Make sure we actually have a directory/build to deploy
 If (-not (Test-Path $bindir)) {
