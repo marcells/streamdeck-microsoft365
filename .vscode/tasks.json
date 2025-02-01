@@ -36,6 +36,20 @@
                 "${workspaceFolder}/Elgato.Plugins.Microsoft365/Elgato.Plugins.Microsoft365.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "Create package for Elgato store",
+            "command": "powershell",
+            "type": "process",
+            "args": [
+                "-ExecutionPolicy",
+                "Unrestricted",
+                "-NoProfile",
+                "-File",
+                "${workspaceFolder}/Elgato.Plugins.Microsoft365/CreateElgatoStorePackage.ps1"
+            ],
+            "dependsOn": "publish",
+            "problemMatcher": []
         }
     ]
 }
